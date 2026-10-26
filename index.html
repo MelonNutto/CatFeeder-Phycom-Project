@@ -1370,11 +1370,11 @@
 <span class="code-line"></span>
 <span class="code-line"><span class="kw">const</span> <span class="type">char</span> MQTT_BROKER_ADRRESS[] = <span class="str">"mqtt-dashboard.com"</span>;</span>
 <span class="code-line"><span class="kw">const</span> <span class="type">int</span> MQTT_PORT = <span class="num">1883</span>;</span>
-<span class="code-line"><span class="kw">const</span> <span class="type">char</span> MQTT_CLIENT_ID[] = <span class="str">"arduino-uno-r4-clienssjjajt"</span>;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">char</span> MQTT_CLIENT_ID[] = <span class="str">"cat-feeder-uno-r4"</span>;</span>
 <span class="code-line"><span class="kw">const</span> <span class="type">char</span> SUBSCRIBE_TOPIC[] = <span class="str">"testtopic/iot23"</span>;</span>
 <span class="code-line"></span>
-<span class="code-line"><span class="type">Servo</span> myPointer;</span>
-<span class="code-line"><span class="kw">const</span> <span class="type">int</span> servoControlPin = <span class="num">2</span>;</span>
+<span class="code-line"><span class="type">Servo</span> feederServo;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">int</span> feederServoPin = <span class="num">2</span>;</span>
 <span class="code-line"><span class="type">WiFiClient</span> network;</span>
 <span class="code-line"><span class="type">MQTTClient</span> mqtt = <span class="func">MQTTClient</span>(<span class="num">256</span>);</span>
 <span class="code-line"></span>
@@ -1389,8 +1389,8 @@
 <span class="code-line">  lcd.<span class="func">init</span>();</span>
 <span class="code-line">  lcd.<span class="func">backlight</span>();</span>
 <span class="code-line">  lcd.<span class="func">print</span>(<span class="str">"IoT Cat Feeder"</span>);</span>
-<span class="code-line">  myPointer.<span class="func">attach</span>(servoControlPin);</span>
-<span class="code-line">  myPointer.<span class="func">write</span>(<span class="num">90</span>); <span class="comment">// Start at closed position</span></span>
+<span class="code-line">  feederServo.<span class="func">attach</span>(feederServoPin);</span>
+<span class="code-line">  feederServo.<span class="func">write</span>(<span class="num">90</span>); <span class="comment">// Start at closed position</span></span>
 <span class="code-line">  <span class="type">int</span> status = WL_IDLE_STATUS;</span>
 <span class="code-line">  <span class="kw">while</span> (status != WL_CONNECTED) {</span>
 <span class="code-line">    status = WiFi.<span class="func">begin</span>(WIFI_SSID, WIFI_PASSWORD);</span>
@@ -1443,9 +1443,9 @@
 <span class="code-line"></span>
 <span class="code-line"><span class="type">void</span> <span class="func">feedPet</span>() {</span>
 <span class="code-line">  lcd.<span class="func">clear</span>(); lcd.<span class="func">print</span>(<span class="str">"** FEEDING... **"</span>);</span>
-<span class="code-line">  myPointer.<span class="func">write</span>(<span class="num">0</span>);   <span class="comment">// Open food gate (0 deg)</span></span>
-<span class="code-line">  <span class="func">delay</span>(<span class="num">1500</span>);          <span class="comment">// Wait 1.5s for food to drop</span></span>
-<span class="code-line">  myPointer.<span class="func">write</span>(<span class="num">90</span>);  <span class="comment">// Close gate (90 deg)</span></span>
+<span class="code-line">  feederServo.<span class="func">write</span>(<span class="num">0</span>);   <span class="comment">// Open food gate (0 deg)</span></span>
+<span class="code-line">  <span class="func">delay</span>(<span class="num">600</span>);           <span class="comment">// Wait for food to drop</span></span>
+<span class="code-line">  feederServo.<span class="func">write</span>(<span class="num">90</span>);  <span class="comment">// Close gate (90 deg)</span></span>
 <span class="code-line">  lastFeedTime = <span class="func">millis</span>();</span>
 <span class="code-line">  lcd.<span class="func">clear</span>();</span>
 <span class="code-line">}</span>

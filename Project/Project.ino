@@ -26,15 +26,15 @@ const char WIFI_PASSWORD[] = "12345678";  // CHANGE TO YOUR WIFI PASSWORD
 
 const char MQTT_BROKER_ADRRESS[] = "mqtt-dashboard.com";
 const int MQTT_PORT = 1883;
-const char MQTT_CLIENT_ID[] = "arduino-uno-r4-clienssjjajt";
+const char MQTT_CLIENT_ID[] = "cat-feeder-uno-r4";
 const char MQTT_USERNAME[] = "";
 const char MQTT_PASSWORD[] = "";
 
 // The MQTT topic that Arduino should subscribe
 const char SUBSCRIBE_TOPIC[] = "testtopic/iot23";
 
-Servo myPointer;
-const int servoControlPin = 2;
+Servo feederServo;
+const int feederServoPin = 2;
 
 WiFiClient network;
 MQTTClient mqtt = MQTTClient(256);
@@ -78,8 +78,8 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print("Connecting WiFi.");
 
-  myPointer.attach(servoControlPin);
-  myPointer.write(90); // Start at closed gate position (90 deg)
+  feederServo.attach(feederServoPin);
+  feederServo.write(90); // Start at closed gate position (90 deg)
 
   int status = WL_IDLE_STATUS;
   while (status != WL_CONNECTED) {
@@ -143,9 +143,9 @@ void feedPet() {
   lcd.setCursor(0, 1);
   lcd.print("Enjoy Meal! =^.^=");
 
-  myPointer.write(0);    // Open food gate (0 deg)
-  delay(600);          // Wait for food to drop (1.5 seconds)
-  myPointer.write(90);   // Close food gate (90 deg)
+  feederServo.write(0);    // Open food gate (0 deg)
+  delay(600);              // Wait for food to drop
+  feederServo.write(90);   // Close food gate (90 deg)
 
   lastFeedTime = millis();
   Serial.println("Feeding complete.");
