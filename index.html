@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Feeder - IoT Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #004E89;
+            --accent: #FCBF49;
+            --bg-dark: #0a0e17;
+            --bg-card: #111827;
+            --bg-card-alt: #1a2332;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+            --gradient-1: linear-gradient(135deg, #FF6B35, #FCBF49);
+            --gradient-2: linear-gradient(135deg, #004E89, #1a73e8);
+            --glow-orange: 0 0 40px rgba(255, 107, 53, 0.3);
+            --glow-blue: 0 0 40px rgba(0, 78, 137, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.6rem 2rem;
+            background: rgba(10, 14, 23, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-logo .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 400;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 6rem 2rem 4rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 78, 137, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(5deg); }
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            font-weight: 300;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* ===== SCROLL INDICATOR ===== */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        .scroll-indicator .arrow {
+            width: 24px;
+            height: 24px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: rotate(45deg);
+        }
+
+        /* ===== SECTIONS ===== */
+        section {
+            padding: 6rem 2rem;
+        }
+
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* ===== ABSTRACT SECTION ===== */
+        #abstract {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(17, 24, 39, 0.5) 100%);
+        }
+
+        .abstract-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .abstract-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+        }
+
+        .abstract-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .abstract-text h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .abstract-text p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 2;
+            text-indent: 2rem;
+            text-align: justify;
+        }
+
+        .abstract-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .info-card .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card .value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        #how-it-works {
+            background: var(--bg-dark);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: var(--glow-orange);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 auto 1.5rem;
+        }
+
+        .step-card .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .step-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* ===== ARCHITECTURE ===== */
+        #architecture {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(17, 24, 39, 0.5) 100%);
+        }
+
+        .arch-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 2rem 0;
+        }
+
+        .arch-node {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            min-width: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .arch-node:hover {
+            border-color: var(--primary);
+            box-shadow: var(--glow-orange);
+            transform: scale(1.05);
+        }
+
+        .arch-node .node-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .arch-node .node-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .arch-node .node-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: var(--primary);
+            animation: arrowPulse 1.5s infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ===== COMPONENTS ===== */
+        #components {
+            background: var(--bg-dark);
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .component-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .component-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 107, 53, 0.3);
+        }
+
+        .component-card:hover::before {
+            opacity: 1;
+        }
+
+        .component-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(255, 107, 53, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .component-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .component-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .component-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 78, 137, 0.15);
+            color: #5ba3d9;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.75rem;
+        }
+
+        /* ===== MQTT SECTION ===== */
+        #mqtt {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(17, 24, 39, 0.5) 100%);
+        }
+
+        .mqtt-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .mqtt-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .mqtt-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .topic-item {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .topic-item .direction {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .topic-item code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .topic-item .desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .payload-example {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-top: 0.75rem;
+        }
+
+        .payload-example .title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .payload-example code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #7ee787;
+        }
+
+        /* ===== SOURCE CODE ===== */
+        #source-code {
+            background: var(--bg-dark);
+        }
+
+        .code-container {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-header .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .code-header .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .code-header .dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-header .dots span:nth-child(1) { background: #ff5f57; }
+        .code-header .dots span:nth-child(2) { background: #ffbd2e; }
+        .code-header .dots span:nth-child(3) { background: #28c840; }
+
+        .code-header .filename {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .code-header .lang-badge {
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 78, 137, 0.2);
+            color: #5ba3d9;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .code-body {
+            padding: 1.5rem;
+            overflow-x: auto;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .code-body::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .code-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .code-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .code-body pre {
+            margin: 0;
+            counter-reset: line;
+        }
+
+        .code-body code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            color: #c9d1d9;
+        }
+
+        .code-line {
+            display: block;
+            padding: 0 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .code-line:hover {
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .code-line::before {
+            counter-increment: line;
+            content: counter(line);
+            display: inline-block;
+            width: 3em;
+            margin-right: 1.5em;
+            text-align: right;
+            color: #484f58;
+            font-size: 0.78rem;
+            user-select: none;
+        }
+
+        /* Syntax highlighting */
+        .kw { color: #ff7b72; }
+        .type { color: #79c0ff; }
+        .str { color: #a5d6ff; }
+        .comment { color: #8b949e; font-style: italic; }
+        .func { color: #d2a8ff; }
+        .num { color: #79c0ff; }
+        .pre { color: #ff7b72; }
+        .macro { color: #ffa657; }
+
+        /* ===== COPY BUTTON ===== */
+        .copy-btn {
+            padding: 0.4rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ===== FEATURES TABLE ===== */
+        #features {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(17, 24, 39, 0.5) 100%);
+        }
+
+        .features-table-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .features-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .features-table th {
+            background: rgba(255, 107, 53, 0.08);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .features-table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .features-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .features-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(40, 200, 64, 0.12);
+            color: #28c840;
+        }
+
+        .status-planned {
+            background: rgba(255, 189, 46, 0.12);
+            color: #ffbd2e;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-tech {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-tech span {
+            padding: 0.3rem 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(10, 14, 23, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 1.5rem 2rem;
+                gap: 1rem;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .abstract-content {
+                grid-template-columns: 1fr;
+            }
+
+            .mqtt-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-flow {
+                flex-direction: column;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+            }
+
+            .abstract-card,
+            .arch-diagram {
+                padding: 1.5rem;
+            }
+
+            section {
+                padding: 4rem 1rem;
+            }
+        }
+
+        /* ===== SCROLL REVEAL ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== CAT EMOJI FLOAT ===== */
+        .cat-float {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.3);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .cat-float:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 12px 40px rgba(255, 107, 53, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <span class="logo-icon">🐱</span>
+                Cat Feeder
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#abstract" class="active">บทคัดย่อ</a></li>
+                <li><a href="#how-it-works">หลักการทำงาน</a></li>
+                <li><a href="#architecture">สถาปัตยกรรม</a></li>
+                <li><a href="#components">อุปกรณ์</a></li>
+                <li><a href="#mqtt">MQTT</a></li>
+                <li><a href="#source-code">Source Code</a></li>
+                <li><a href="#features">คุณสมบัติ</a></li>
+            </ul>
+            <button class="mobile-toggle" id="mobileToggle" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                IoT Project — Arduino UNO R4
+            </div>
+            <h1>
+                <span class="gradient-text">Cat Feeder</span><br>
+                เครื่องให้อาหารแมวอัจฉริยะ
+            </h1>
+            <p>
+                ระบบให้อาหารแมวอัตโนมัติผ่านอินเทอร์เน็ต ควบคุมระยะไกลด้วย MQTT Protocol
+                บนบอร์ด Arduino UNO R4 WiFi
+            </p>
+            <div class="hero-buttons">
+                <a href="#abstract" class="btn btn-primary">📖 อ่านบทคัดย่อ</a>
+                <a href="#source-code" class="btn btn-secondary">💻 ดู Source Code</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>เลื่อนลง</span>
+            <div class="arrow"></div>
+        </div>
+    </section>
+
+    <!-- ABSTRACT -->
+    <section id="abstract">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Abstract / บทคัดย่อ</span>
+                <h2 class="section-title">บทคัดย่อโปรเจค</h2>
+                <p class="section-subtitle">ภาพรวมและวัตถุประสงค์ของโปรเจคเครื่องให้อาหารแมวอัจฉริยะ</p>
+            </div>
+            <div class="abstract-card reveal">
+                <div class="abstract-content">
+                    <div class="abstract-text">
+                        <h3>🐾 Cat Feeder — เครื่องให้อาหารแมวอัจฉริยะผ่าน IoT</h3>
+                        <p>
+                            โปรเจคนี้ได้พัฒนาระบบเครื่องให้อาหารแมวอัจฉริยะ (Smart Cat Feeder) ที่สามารถสั่งการให้อาหารได้จากระยะไกลผ่านเครือข่ายอินเทอร์เน็ต โดยใช้บอร์ดไมโครคอนโทรลเลอร์ Arduino UNO R4 WiFi เป็นหน่วยประมวลผลหลัก ทำงานร่วมกับเซอร์โวมอเตอร์ (Servo Motor) ในการควบคุมกลไกการเปิด-ปิดที่จ่ายอาหาร
+                        </p>
+                        <br>
+                        <p>
+                            ระบบสื่อสารผ่าน MQTT Protocol (Message Queuing Telemetry Transport) ซึ่งเป็นโปรโตคอลการสื่อสารแบบน้ำหนักเบาที่เหมาะสำหรับอุปกรณ์ IoT โดยเชื่อมต่อกับ MQTT Broker (mqtt-dashboard.com) เพื่อรับคำสั่งจากแอปพลิเคชันหรือเว็บไซต์ควบคุม เมื่อได้รับคำสั่ง "FEED" เซอร์โวมอเตอร์จะหมุนไปที่ 0 องศาเพื่อเปิดช่องจ่ายอาหาร รอ 1.5 วินาทีให้อาหารตกลงถาด จากนั้นหมุนกลับมาที่ 90 องศาเพื่อปิดช่องจ่ายอาหารโดยอัตโนมัติ
+                        </p>
+                        <br>
+                        <p>
+                            จุดเด่นของโปรเจคนี้คือเจ้าของสัตว์เลี้ยงสามารถให้อาหารแมวได้จากทุกที่ทุกเวลาผ่านสมาร์ทโฟน โดยไม่ต้องอยู่บ้าน ช่วยแก้ปัญหาในกรณีที่ต้องเดินทางหรือทำงานนอกบ้านเป็นเวลานาน ทำให้มั่นใจได้ว่าแมวจะได้รับอาหารตรงเวลาเสมอ
+                        </p>
+                    </div>
+                    <div class="abstract-info">
+                        <div class="info-card">
+                            <div class="label">ชื่อโปรเจค</div>
+                            <div class="value">Cat Feeder — เครื่องให้อาหารแมวอัจฉริยะ</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">ประเภท</div>
+                            <div class="value">Internet of Things (IoT)</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">บอร์ดหลัก</div>
+                            <div class="value">Arduino UNO R4 WiFi</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">โปรโตคอล</div>
+                            <div class="value">MQTT (Message Queuing Telemetry Transport)</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">Broker</div>
+                            <div class="value">mqtt-dashboard.com : 1883</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">คำสั่งควบคุม</div>
+                            <div class="value">FEED (ให้อาหาร — เปิดแล้วปิดอัตโนมัติ)</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">ภาษา</div>
+                            <div class="value">Arduino C/C++</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">How It Works</span>
+                <h2 class="section-title">หลักการทำงาน</h2>
+                <p class="section-subtitle">ขั้นตอนการทำงานของระบบ Cat Feeder ตั้งแต่ต้นจนจบ</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">📶</div>
+                    <h3>เชื่อมต่อ WiFi</h3>
+                    <p>Arduino UNO R4 เชื่อมต่อกับเครือข่าย WiFi โดยอัตโนมัติเมื่อเปิดเครื่อง พร้อมแสดง IP Address ผ่าน Serial Monitor</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">🔗</div>
+                    <h3>เชื่อมต่อ MQTT Broker</h3>
+                    <p>เชื่อมต่อกับ MQTT Broker (mqtt-dashboard.com) และ Subscribe รับคำสั่งจาก Topic ที่กำหนด</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">📱</div>
+                    <h3>ส่งคำสั่งผ่านแอป</h3>
+                    <p>ผู้ใช้ส่งคำสั่ง "FEED" ผ่านแอป MQTT Client เพื่อสั่งให้อาหารแมว</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">⚙️</div>
+                    <h3>Servo ทำงาน</h3>
+                    <p>เซอร์โวมอเตอร์หมุนไปที่ 0° เพื่อเปิดช่องจ่ายอาหาร รอ 1.5 วินาที แล้วหมุนกลับ 90° ปิดช่อง</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">System Architecture</span>
+                <h2 class="section-title">สถาปัตยกรรมระบบ</h2>
+                <p class="section-subtitle">ภาพรวมการเชื่อมต่อและสื่อสารของระบบ Cat Feeder</p>
+            </div>
+            <div class="arch-diagram reveal">
+                <div class="arch-flow">
+                    <div class="arch-node">
+                        <div class="node-icon">📱</div>
+                        <div class="node-label">MQTT Client</div>
+                        <div class="node-desc">แอปควบคุม</div>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="node-icon">☁️</div>
+                        <div class="node-label">MQTT Broker</div>
+                        <div class="node-desc">mqtt-dashboard.com</div>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="node-icon">📡</div>
+                        <div class="node-label">WiFi</div>
+                        <div class="node-desc">เครือข่ายไร้สาย</div>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="node-icon">🔧</div>
+                        <div class="node-label">Arduino R4</div>
+                        <div class="node-desc">ไมโครคอนโทรลเลอร์</div>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="node-icon">⚙️</div>
+                        <div class="node-label">Servo Motor</div>
+                        <div class="node-desc">จ่ายอาหาร</div>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="node-icon">🐱</div>
+                        <div class="node-label">Cat</div>
+                        <div class="node-desc">น้องเหมียว</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPONENTS -->
+    <section id="components">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Hardware & Software</span>
+                <h2 class="section-title">อุปกรณ์และเทคโนโลยี</h2>
+                <p class="section-subtitle">รายละเอียดอุปกรณ์และซอฟต์แวร์ที่ใช้ในโปรเจค</p>
+            </div>
+            <div class="components-grid">
+                <div class="component-card reveal">
+                    <div class="component-icon">🔧</div>
+                    <h3>Arduino UNO R4 WiFi</h3>
+                    <p>บอร์ดไมโครคอนโทรลเลอร์หลักที่มี WiFi ในตัว รองรับการเชื่อมต่อเครือข่ายไร้สายโดยตรง</p>
+                    <span class="component-tag">Microcontroller</span>
+                </div>
+                <div class="component-card reveal">
+                    <div class="component-icon">⚙️</div>
+                    <h3>Servo Motor (SG90)</h3>
+                    <p>เซอร์โวมอเตอร์ที่ใช้ควบคุมกลไกเปิด-ปิดช่องจ่ายอาหาร หมุนได้ 0°-180° ต่อที่ Pin 2</p>
+                    <span class="component-tag">Actuator</span>
+                </div>
+                <div class="component-card reveal">
+                    <div class="component-icon">📡</div>
+                    <h3>WiFiS3 Library</h3>
+                    <p>ไลบรารีสำหรับเชื่อมต่อ WiFi บน Arduino UNO R4 รองรับ WPA/WPA2</p>
+                    <span class="component-tag">Library</span>
+                </div>
+                <div class="component-card reveal">
+                    <div class="component-icon">📨</div>
+                    <h3>MQTTClient Library</h3>
+                    <p>ไลบรารีสำหรับสื่อสารผ่าน MQTT Protocol รองรับ Publish/Subscribe pattern</p>
+                    <span class="component-tag">Library</span>
+                </div>
+                <div class="component-card reveal">
+                    <div class="component-icon">🔌</div>
+                    <h3>Servo Library</h3>
+                    <p>ไลบรารีควบคุมเซอร์โวมอเตอร์สำหรับ Arduino สั่งหมุนไปยังตำแหน่งองศาที่ต้องการ</p>
+                    <span class="component-tag">Library</span>
+                </div>
+                <div class="component-card reveal">
+                    <div class="component-icon">📟</div>
+                    <h3>I2C LCD 16x2 Display</h3>
+                    <p>หน้าจอแสดงผล LCD แสดงเวลาปัจจุบัน (NTP UTC+7) และเวลาที่ผ่านไปหลังการให้อาหารครั้งล่าสุด</p>
+                    <span class="component-tag">Display</span>
+                </div>
+                <div class="component-card reveal">
+                    <div class="component-icon">⏱️</div>
+                    <h3>Dual Timer System</h3>
+                    <p>ระบบตั้งเวลานับถอยหลังบน Web Dashboard และระบบจ่ายอาหารอัตโนมัติทุกรอบเวลาบนบอร์ด</p>
+                    <span class="component-tag">Automation</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MQTT -->
+    <section id="mqtt">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">MQTT Communication</span>
+                <h2 class="section-title">การสื่อสาร MQTT</h2>
+                <p class="section-subtitle">รายละเอียด Topics และ Payload ที่ใช้ในระบบ</p>
+            </div>
+            <div class="mqtt-grid">
+                <div class="mqtt-card reveal">
+                    <h3>📥 Topics</h3>
+                    <div class="topic-item">
+                        <div class="direction">Subscribe (รับคำสั่ง)</div>
+                        <code>testtopic/iot23</code>
+                        <div class="desc">รับคำสั่งจ่ายอาหารจากหน้าเว็บคอนโทรลเลอร์</div>
+                    </div>
+                    <div class="topic-item">
+                        <div class="direction">Architecture Mode</div>
+                        <code>Command Listener</code>
+                        <div class="desc">รอรับคำสั่งควบคุม Servo โดยตรง (ไม่ต้องส่ง Publish telemetry)</div>
+                    </div>
+                </div>
+                <div class="mqtt-card reveal">
+                    <h3>📋 คำสั่งที่รองรับ (Payload)</h3>
+                    <div class="payload-example">
+                        <div class="title">🍽️ ควบคุม Servo — ให้อาหาร</div>
+                        <code>"FEED"</code> → เปิดช่องจ่ายอาหาร (0°) รอ 1.5 วิ แล้วปิดอัตโนมัติ (90°)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOURCE CODE -->
+    <section id="source-code">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Source Code</span>
+                <h2 class="section-title">ซอร์สโค้ด</h2>
+                <p class="section-subtitle">โค้ดทั้งหมดของโปรเจค Cat Feeder — Arduino C/C++</p>
+            </div>
+            <div class="code-container reveal">
+                <div class="code-header">
+                    <div class="file-info">
+                        <div class="dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span class="filename">Project.ino</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="lang-badge">Arduino C++</span>
+                        <button class="copy-btn" onclick="copyCode()">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="code-body">
+                    <pre><code id="sourceCode"><span class="code-line"><span class="comment">/*</span></span>
+<span class="code-line"><span class="comment"> *</span></span>
+<span class="code-line"><span class="comment"> * This Arduino UNO R4 code is made available for public use without any restriction</span></span>
+<span class="code-line"><span class="comment"> *</span></span>
+<span class="code-line"><span class="comment"> */</span></span>
+<span class="code-line"> </span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">&lt;Wire.h&gt;</span></span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">"Servo.h"</span></span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">&lt;WiFiS3.h&gt;</span></span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">&lt;WiFiUdp.h&gt;</span></span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">&lt;MQTTClient.h&gt;</span></span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">&lt;LiquidCrystal_I2C.h&gt;</span></span>
+<span class="code-line"><span class="pre">#include</span> <span class="str">"RTC.h"</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">LiquidCrystal_I2C</span> <span class="func">lcd</span>(<span class="num">0x27</span>, <span class="num">16</span>, <span class="num">2</span>);</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="kw">const</span> <span class="type">char</span> WIFI_SSID[] = <span class="str">"iPhone"</span>;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">char</span> WIFI_PASSWORD[] = <span class="str">"12345678"</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="kw">const</span> <span class="type">char</span> MQTT_BROKER_ADRRESS[] = <span class="str">"mqtt-dashboard.com"</span>;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">int</span> MQTT_PORT = <span class="num">1883</span>;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">char</span> MQTT_CLIENT_ID[] = <span class="str">"arduino-uno-r4-clienssjjajt"</span>;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">char</span> SUBSCRIBE_TOPIC[] = <span class="str">"testtopic/iot23"</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">Servo</span> myPointer;</span>
+<span class="code-line"><span class="kw">const</span> <span class="type">int</span> servoControlPin = <span class="num">2</span>;</span>
+<span class="code-line"><span class="type">WiFiClient</span> network;</span>
+<span class="code-line"><span class="type">MQTTClient</span> mqtt = <span class="func">MQTTClient</span>(<span class="num">256</span>);</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">// Automatic interval timer (4 hours)</span></span>
+<span class="code-line"><span class="type">unsigned long</span> FEED_INTERVAL_MS = <span class="num">4UL</span> * <span class="num">60UL</span> * <span class="num">60UL</span> * <span class="num">1000UL</span>;</span>
+<span class="code-line"><span class="type">unsigned long</span> lastFeedTime = <span class="num">0</span>;</span>
+<span class="code-line"><span class="type">bool</span> timeSynced = <span class="kw">false</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">void</span> <span class="func">setup</span>() {</span>
+<span class="code-line">  Serial.<span class="func">begin</span>(<span class="num">9600</span>);</span>
+<span class="code-line">  RTC.<span class="func">begin</span>();</span>
+<span class="code-line">  lcd.<span class="func">init</span>();</span>
+<span class="code-line">  lcd.<span class="func">backlight</span>();</span>
+<span class="code-line">  lcd.<span class="func">print</span>(<span class="str">"IoT Cat Feeder"</span>);</span>
+<span class="code-line">  myPointer.<span class="func">attach</span>(servoControlPin);</span>
+<span class="code-line">  myPointer.<span class="func">write</span>(<span class="num">90</span>); <span class="comment">// Start at closed position</span></span>
+<span class="code-line">  <span class="type">int</span> status = WL_IDLE_STATUS;</span>
+<span class="code-line">  <span class="kw">while</span> (status != WL_CONNECTED) {</span>
+<span class="code-line">    status = WiFi.<span class="func">begin</span>(WIFI_SSID, WIFI_PASSWORD);</span>
+<span class="code-line">    <span class="func">delay</span>(<span class="num">4000</span>);</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="func">syncNTP</span>(); <span class="comment">// Native WiFiUDP NTP Sync</span></span>
+<span class="code-line">  <span class="func">connectToMQTT</span>();</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">void</span> <span class="func">loop</span>() {</span>
+<span class="code-line">  mqtt.<span class="func">loop</span>();</span>
+<span class="code-line">  <span class="kw">if</span> (!mqtt.<span class="func">connected</span>()) { <span class="func">connectToMQTT</span>(); }</span>
+<span class="code-line">  </span>
+<span class="code-line">  <span class="comment">// Auto Feeding Timer (ทุกๆ 4 ชั่วโมง)</span></span>
+<span class="code-line">  <span class="kw">if</span> (lastFeedTime &gt; <span class="num">0</span> &amp;&amp; (<span class="func">millis</span>() - lastFeedTime &gt;= FEED_INTERVAL_MS)) {</span>
+<span class="code-line">    <span class="func">feedPet</span>();</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="func">updateLCD</span>(); <span class="comment">// แสดงเวลาปัจจุบันและเวลาหลังให้อาหารล่าสุด</span></span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">void</span> <span class="func">connectToMQTT</span>() {</span>
+<span class="code-line">  <span class="comment">// Connect to the MQTT broker</span></span>
+<span class="code-line">  mqtt.<span class="func">begin</span>(MQTT_BROKER_ADRRESS, MQTT_PORT, network);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="comment">// Create a handler for incoming messages</span></span>
+<span class="code-line">  mqtt.<span class="func">onMessage</span>(messageReceived);</span>
+<span class="code-line"></span>
+<span class="code-line">  Serial.<span class="func">print</span>(<span class="str">"Arduino UNO R4 - Connecting to MQTT broker"</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="kw">while</span> (!mqtt.<span class="func">connect</span>(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD)) {</span>
+<span class="code-line">    Serial.<span class="func">print</span>(<span class="str">"."</span>);</span>
+<span class="code-line">    <span class="func">delay</span>(<span class="num">100</span>);</span>
+<span class="code-line">  }</span>
+<span class="code-line">  Serial.<span class="func">println</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="kw">if</span> (!mqtt.<span class="func">connected</span>()) {</span>
+<span class="code-line">    Serial.<span class="func">println</span>(<span class="str">"Arduino UNO R4 - MQTT broker Timeout!"</span>);</span>
+<span class="code-line">    <span class="kw">return</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="comment">// Subscribe to a topic</span></span>
+<span class="code-line">  <span class="kw">if</span> (mqtt.<span class="func">subscribe</span>(SUBSCRIBE_TOPIC))</span>
+<span class="code-line">    Serial.<span class="func">print</span>(<span class="str">"Arduino UNO R4 - Subscribed to the topic: "</span>);</span>
+<span class="code-line">  <span class="kw">else</span></span>
+<span class="code-line">    Serial.<span class="func">print</span>(<span class="str">"Arduino UNO R4 - Failed to subscribe to the topic: "</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  Serial.<span class="func">println</span>(SUBSCRIBE_TOPIC);</span>
+<span class="code-line">  Serial.<span class="func">println</span>(<span class="str">"Arduino UNO R4 - MQTT broker Connected!"</span>);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">void</span> <span class="func">feedPet</span>() {</span>
+<span class="code-line">  lcd.<span class="func">clear</span>(); lcd.<span class="func">print</span>(<span class="str">"** FEEDING... **"</span>);</span>
+<span class="code-line">  myPointer.<span class="func">write</span>(<span class="num">0</span>);   <span class="comment">// Open food gate (0 deg)</span></span>
+<span class="code-line">  <span class="func">delay</span>(<span class="num">1500</span>);          <span class="comment">// Wait 1.5s for food to drop</span></span>
+<span class="code-line">  myPointer.<span class="func">write</span>(<span class="num">90</span>);  <span class="comment">// Close gate (90 deg)</span></span>
+<span class="code-line">  lastFeedTime = <span class="func">millis</span>();</span>
+<span class="code-line">  lcd.<span class="func">clear</span>();</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="type">void</span> <span class="func">messageReceived</span>(<span class="type">String</span> &amp;topic, <span class="type">String</span> &amp;payload) {</span>
+<span class="code-line">  <span class="kw">if</span> (payload == <span class="str">"FEED"</span>) {</span>
+<span class="code-line">    <span class="func">feedPet</span>();</span>
+<span class="code-line">  } <span class="kw">else if</span> (payload.<span class="func">startsWith</span>(<span class="str">"TIME:"</span>)) {</span>
+<span class="code-line">    <span class="comment">// Web/MQTT Time Sync Fallback</span></span>
+<span class="code-line">    <span class="type">unsigned long</span> webEpoch = payload.<span class="func">substring</span>(<span class="num">5</span>).<span class="func">toInt</span>();</span>
+<span class="code-line">    <span class="type">RTCTime</span> timeToSet = <span class="func">RTCTime</span>(webEpoch + (<span class="num">7</span> * <span class="num">3600</span>));</span>
+<span class="code-line">    RTC.<span class="func">setTime</span>(timeToSet);</span>
+<span class="code-line">    timeSynced = <span class="kw">true</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Features</span>
+                <h2 class="section-title">คุณสมบัติและฟีเจอร์</h2>
+                <p class="section-subtitle">สรุปความสามารถทั้งหมดของระบบ Cat Feeder</p>
+            </div>
+            <div class="features-table-wrapper reveal">
+                <table class="features-table">
+                    <thead>
+                        <tr>
+                            <th>คุณสมบัติ</th>
+                            <th>รายละเอียด</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ให้อาหารระยะไกล</strong></td>
+                            <td>ส่งคำสั่ง "FEED" ผ่าน MQTT จากทุกที่ผ่านอินเทอร์เน็ต</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Servo Motor Control</strong></td>
+                            <td>ควบคุมเซอร์โวเปิด-ปิดช่องจ่ายอาหารอัตโนมัติ (0°↔90°)</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>WiFi Connectivity</strong></td>
+                            <td>เชื่อมต่อเครือข่าย WiFi (WPA/WPA2) อัตโนมัติเมื่อเปิดเครื่อง</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>MQTT Pub/Sub</strong></td>
+                            <td>สื่อสารแบบ Publish/Subscribe กับ MQTT Broker</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Auto-Close Gate</strong></td>
+                            <td>ช่องจ่ายอาหารปิดอัตโนมัติหลังให้อาหาร 1.5 วินาที</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Heartbeat Publishing</strong></td>
+                            <td>ส่งข้อมูล uptime ทุก 5 วินาที เพื่อตรวจสอบสถานะออนไลน์</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ตั้งเวลาให้อาหาร (Dual Timer)</strong></td>
+                            <td>ตั้งเวลาอัตโนมัติบน Web Dashboard และมีตัวนับเวลาสำรองบนบอร์ด Arduino</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>หน้าจอ LCD 16x2 แสดงเวลา</strong></td>
+                            <td>แสดงเวลาปัจจุบัน (NTP Time) และเวลานับตั้งแต่ให้อาหารครั้งล่าสุด (Time since last feed)</td>
+                            <td><span class="status-badge status-active">● ใช้งานได้</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>เซ็นเซอร์ปริมาณอาหาร</strong></td>
+                            <td>ตรวจจับระดับอาหารคงเหลือในถังแจ้งเตือนเมื่อใกล้หมด</td>
+                            <td><span class="status-badge status-planned">◐ วางแผน</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">🐱 Cat Feeder</div>
+            <p class="footer-text">IoT Smart Cat Feeder Project — Arduino UNO R4 WiFi + MQTT</p>
+            <div class="footer-tech">
+                <span>Arduino UNO R4</span>
+                <span>WiFi</span>
+                <span>MQTT</span>
+                <span>Servo Motor</span>
+                <span>C/C++</span>
+                <span>IoT</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- BACK TO TOP -->
+    <a href="#hero" class="cat-float" title="กลับด้านบน">🐱</a>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Active nav link
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-links a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Scroll reveal
+        const revealElements = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => observer.observe(el));
+
+        // Copy code
+        function copyCode() {
+            const code = document.getElementById('sourceCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = '📋 Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
