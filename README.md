@@ -1,9 +1,9 @@
 # CatFeeder-Phycom-Project
 <p>This project for my cat.</p>
  <h4>Website</h4>
-<p>*[WEB](https://melonnutto.github.io/CatFeeder-Phycom-Project/)*.</p>
+<p>*[WEB](https://melonnutto.github.io/CatFeeder-Phycom-Project/).</p>
  <h4>Youtube</h4>
-<p>*[YT](https://youtu.be/9_oIyDYVWyQ)*.</p>
+<p>*[YT](https://youtu.be/9_oIyDYVWyQ).</p>
 <img width="2245" height="3179" alt="CAT FEEDER" src="https://github.com/user-attachments/assets/7b247d83-22ba-47c2-8015-3b332ca544e2" />
 
 # NAME
